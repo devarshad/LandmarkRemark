@@ -1,0 +1,65 @@
+﻿<div class="col-md-4">
+    <div class="page-header">
+        Please submit your application form
+    </div>
+    <form name="form" ng-submit="addStudent()" class="form-horizontal" novalidate>
+        <div class="form-group">
+            <label for="name" class="col-md-2">Name</label>
+            <div class="col-md-10">
+                <input type="text" ng-model="student.Name" placeholder="Please enter your name" class="form-control" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="department" class="col-md-2">Department</label>
+            <div class="col-md-10">
+                <input integer type="number" min="10" max="20" ng-model="student.Department" name="department" placeholder="Please enter a department" class="form-control" required />
+                <div ng-show="form.$submitted || form.department.$touched">
+                    <span ng-show="form.department.$error.required">
+                        Tell us your department.
+                    </span>
+                </div>
+                <span ng-show="form.department.$error.integer">
+                    Department is not integer.
+                </span>
+                <span ng-show="form.department.$pending.integer">
+                    Department is checking...
+                </span>
+                <span ng-show="form.department.$error.min">
+                    Please enter department 10 or older.
+                </span>
+                <span ng-show="form.department.$error.max">
+                    Please enter department 20 or younger.
+                </span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="subject" class="col-md-2">Subject</label>
+            <div class="col-md-10">
+                <input type="text" ng-model="student.Subject" placeholder="Plese enter a subject" class="form-control" value="" />
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-12 col-md-offset-2">
+                <input type="submit" value="Submit" class="btn btn-default" />
+                <input type="button" class="btn btn-success" value="{{Capital}}" ng-click="changeLetter()" />
+                <input type="reset" value="Clear" class="btn btn-danger" ng-click="initializeStudent(form)" />
+            </div>
+        </div>
+    </form>
+</div>
+<div class="col-md-3">
+    <div class="page-header">
+        Welcome  to our portal !
+    </div>
+    <div ng-click="updateAdminName()" ng-show="adminName && !editingAdminName">
+        Dear {{adminName}} !
+    </div>
+    <div ng-show="editingAdminName">
+        <input type="text" ng-model="adminName" class="form-control" />
+        <input type="button" ng-click="saveAdminName()" class="btn btn-sm btn-success" value="Update" />
+        <input type="button" ng-click="closeAdminName()" class="btn btn-sm btn-default" value="Close" />
+    </div>
+    <span ng-show="adminMessage">
+        {{adminMessage}}
+    </span>
+</div>

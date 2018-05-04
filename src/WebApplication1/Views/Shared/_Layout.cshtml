@@ -1,0 +1,62 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - My ASP.NET Application</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @*<base href="/">*@
+</head>
+<body ng-app="myapp">
+    <div class="navbar navbar-inverse navbar-fixed-top" ng-show="UserName">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">Landmark Remark</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/about">About</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a>Hello ! {{UserName}}</a> 
+                    </li>
+                    <li ng-controller="accountController"><a href="#" ng-click="signOff()">Sign Off</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="container body-content">
+                @RenderBody()
+    </div>
+    <footer>
+        <hr />
+        <p>&copy; @DateTime.Now.Year - Landmark Remark</p>
+    </footer>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/angular")
+    <script src="~/Angular/app.js"></script>
+    <script src="~/Angular/route.js"></script>
+    <script src="~/Angular/filters/baseFilter.js"></script>
+    <script src="~/Angular/controllers/baseController.js"></script>
+    <script src="~/Angular/services/baseService.js"></script>
+    <script src="~/Angular/directives/baseDirective.js"></script>
+    <script src="~/Angular/factory/interceptor.js"></script>
+    <script src="~/Angular/factory/session.js"></script>
+    <script src="~/Angular/services/accountService.js"></script>
+    <script src="~/Angular/services/locationService.js"></script>
+    <script src="~/Angular/controllers/accountController.js"></script>
+    <script src="~/Angular/controllers/locationController.js"></script>
+    <script src="~/Angular/controllers/aboutController.js"></script>
+    <script src="~/Angular/controllers/errorController.js"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>

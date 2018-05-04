@@ -1,0 +1,288 @@
+﻿<style>
+    #map-canvas {
+        margin: 0;
+        padding: 0;
+        height: 600px;
+        max-width: none;
+    }
+
+        #map-canvas img {
+            max-width: none !important;
+        }
+
+    .gm-style-iw {
+        width: 100px !important;
+        top: 15px !important;
+        left: 0px !important;
+        background-color: #fff;
+        box-shadow: 0 1px 6px rgba(178, 178, 178, 0.6);
+        border: 1px solid rgba(72, 181, 233, 0.6);
+        border-radius: 2px 2px 10px 10px;
+    }
+
+    #iw-container .iw-title {
+        font-family: 'Open Sans Condensed', sans-serif;
+        font-size: 13px;
+        font-weight: 400;
+        padding: 4px;
+        background-color: #525556;
+        color: white;
+        margin: 0;
+        border-radius: 2px 2px 0 0;
+    }
+
+    #iw-container .iw-content {
+        word-wrap: break-word;
+        font-size: 12px;
+        padding: 5px 5px;
+        line-height: 18px;
+        font-weight: 400;
+        margin-right: 1px;
+        height: 70px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        width: 100px !important;
+    }
+
+    .iw-content img {
+        float: right;
+        margin: 0 5px 5px 10px;
+    }
+
+    .iw-bottom-gradient {
+        position: absolute;
+        width: 100px;
+        height: 16px;
+        bottom: 4px;
+        right: 0;
+        background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
+        background: -webkit-linear-gradient(top, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
+        background: -moz-linear-gradient(top, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
+        background: -ms-linear-gradient(top, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
+    }
+
+    #myNote {
+        max-width: 100% !important;
+        border: 0;
+        height: 85%;
+        resize: none;
+        outline: none;
+    }
+
+    ::-webkit-scrollbar-track {
+        -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+        border-radius: 10px;
+        background-color: #F5F5F5;
+    }
+
+    ::-webkit-scrollbar {
+        width: 5px;
+        background-color: #F5F5F5;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 10px;
+        -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+        background-color: #4674b9;
+    }
+
+    .iw-content i.fa {
+        cursor: pointer;
+        margin-right: 10px;
+        float: right;
+    }
+</style>
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC2RLC5cpU_XAyAA_HUoaaAJHsLYSw9Mdc&callback=initMap">
+</script>
+<div class="row">
+    <div class="col-md-3 pull-right">
+        <div id="irrelevantContainer">
+            <div class="form-group has-feedback">
+                <input placeholder="Search by UserName or note" type="text" class="form-control input-sm">
+                <span class="btn fa fa-search form-control-feedback" style="float: right; padding-right: 7px; margin-top: -29px; position: relative; width: 34px; background-color: #ccc;"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div id="map-canvas" class="map"></div>
+    </div>
+</div>
+<script>
+
+
+        // InfoWindow content
+        var content = '<div id="iw-container">' +
+                          '<div class="iw-title">@@userName</div>' +
+                          '<div class="iw-content">@@remark</div>' +
+                          '<div class="iw-bottom-gradient"></div>' +
+                        '</div>';
+
+        var myContent = '<div id="iw-container">' +
+                                  '<div class="iw-title">@@userName</div>' +
+                                  '<div class="iw-content" style="overflow:hidden !important;">' +
+                                        '<textarea placeholder="Add a note.." id="myNote"></textarea>' +
+                                        '<span><i id="okNote" class="fa fa-check" aria-hidden="true"></i>&nbsp;&nbsp;<i id="cancelNote" class="fa fa-times" aria-hidden="true"></i></span>' +
+                                    '</div>' +
+                                  '<div class="iw-bottom-gradient"></div>' +
+                                '</div>';
+
+        var data = [{ UserName: "Arshad", pos: { lat: -25.363, lng: 11.044, remark: "testing feature1" } }
+                    , { UserName: "Saurabh", pos: { lat: 25.363, lng: 21.044, remark: "testing feature2" } }
+                    , { UserName: "Ankita", pos: { lat: -35.363, lng: 71.044, remark: "testing feature3" } }
+                    , { UserName: "Ayaz", pos: { lat: -45.363, lng: 101.044, remark: "testing feature4" } }
+                    , { UserName: "Mayank", pos: { lat: -85.363, lng: 111.044, remark: "testing feature5" } }];
+
+        // Note: This example requires that you consent to location sharing when
+        // prompted by your browser. If you see the error "The Geolocation service
+        // failed.", it means you probably did not give permission for the browser to
+        // locate you.
+        var map;
+        var currentLocation;
+        function handleLocationError(browserHasGeolocation, infoWindow, pos) {
+            infoWindow.setPosition(pos);
+            infoWindow.setContent(browserHasGeolocation ?
+                                  'Error: The Geolocation service failed.' :
+                                  'Error: Your browser doesn\'t support geolocation.');
+            infoWindow.open(map);
+        }
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map-canvas'), {
+                zoom: 2
+            });
+            var currentUser = "Priyanka";
+
+            // Try HTML5 geolocation.
+            var _currentLocationInfoWindow = new google.maps.InfoWindow;
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    currentLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+
+                    var myData = $.grep(data, function (o, i) {
+                        return o.UserName == currentUser || o.pos.lat == currentLocation.lat && o.pos.lng == currentLocation.lat;
+                    })
+                    _currentLocationInfoWindow = new google.maps.InfoWindow({
+                        content: myContent.replace('@@userName', currentUser),
+                        position: currentLocation,
+                        // Assign a maximum value for the width of the infowindow allows
+                        // greater control over the various content elements
+                        maxWidth: 100
+                    });
+
+                    var currentLocationMarker = new google.maps.Marker({
+                        position: currentLocation,
+                        map: map
+                    });
+
+                    addDomreadyOfInfoWindow(_currentLocationInfoWindow, data.length);
+
+                    if (!myData.length) {
+                        google.maps.event.addListener(currentLocationMarker, 'click', function () {
+                            _currentLocationInfoWindow.open(map);
+                            document.getElementById('myNote').focus();
+
+                            $('#okNote').one('click', function () {
+                                $('#myNote').parent().css({ 'overflow-y': 'auto' });
+                                $('#myNote').parent().html($('#myNote')[0].value.replace(/\r?\n/g, '<br/>'));
+                            });
+                            $('#cancelNote').one('click', function () {
+                                $('#myNote')[0].value = "";
+                                _currentLocationInfoWindow.close();
+                            });
+                        });
+                    }
+                    map.setCenter(currentLocation);
+                    addOtherPostions(function () {
+                        setTimeout(function () {
+                            map.setCenter(currentLocation);
+                        }, 200);
+                    });
+
+                }, function () {
+                    handleLocationError(true, _currentLocationInfoWindow, map.getCenter());
+                    addOtherPostions();
+                });
+            } else {
+                // Browser doesn't support Geolocation
+                handleLocationError(false, _currentLocationInfoWindow, map.getCenter());
+                addOtherPostions();
+            }
+        }
+        function addOtherPostions(callback) {
+            var _infoWindow = new Array(data.length),
+                _marker = new Array(data.length);
+            $.each(data, function (index, object) {
+                _infoWindow[index] = new google.maps.InfoWindow({
+                    content: content.replace('@@userName', object.UserName).replace('@@remark', object.pos.remark),
+                    position: object.pos,
+
+                    // Assign a maximum value for the width of the infowindow allows
+                    // greater control over the various content elements
+                    maxWidth: 100
+                });
+
+                _infoWindow[index].open(map);
+
+                // marker options
+                _marker[index] = new google.maps.Marker({
+                    position: object.pos,
+                    map: map,
+                    title: object.pos.remark
+                });
+                addDomreadyOfInfoWindow(_infoWindow[index], index);
+            });
+            callback();
+        }
+        function addDomreadyOfInfoWindow(elem, index) {
+            google.maps.event.addListener(elem, 'domready', function () {
+                // Reference to the DIV that wraps the bottom of infowindow
+                updateInfoWindow($($('.gm-style-iw')[index]));
+            });
+        }
+
+        function updateInfoWindow(iwOuter) {
+
+            /* Since this div is in a position prior to .gm-div style-iw.
+             * We use jQuery and create a iwBackground variable,
+             * and took advantage of the existing reference .gm-style-iw for the previous div with .prev().
+            */
+            var iwBackground = iwOuter.prev();
+
+            // Removes background shadow DIV
+            iwBackground.children(':nth-child(2)').css({ 'display': 'none' });
+
+            // Removes white background DIV
+            iwBackground.children(':nth-child(4)').css({ 'display': 'none' });
+
+            // Moves the infowindow 115px to the right.
+            //iwOuter.parent().parent().css({ left: '115px' });
+            iwOuter.parent().parent().css({ top: '-10px' });
+
+            // Moves the shadow of the arrow 76px to the left margin.
+            iwBackground.children(':nth-child(1)').attr('style', function (i, s) { return s + 'left: 76px !important;' });
+
+            // Moves the arrow 76px to the left margin.
+            iwBackground.children(':nth-child(3)').attr('style', function (i, s) { return s + 'left: 76px !important;' });
+
+            // Changes the desired tail shadow color.
+            iwBackground.children(':nth-child(3)').find('div').children().css({ 'box-shadow': 'rgba(72, 181, 233, 0.6) 0px 1px 6px', 'z-index': '1' });
+
+            // Reference to the div that groups the close button elements.
+            var iwCloseBtn = iwOuter.next();
+
+            // Remove close button
+            iwCloseBtn.css({ display: 'none' });
+
+            // If the content of infowindow not exceed the set maximum height, then the gradient is removed.
+            if ($('.iw-content').height() < 65) {
+                $('.iw-bottom-gradient').css({ display: 'none' });
+            }
+        }
+
+</script>
